@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#120a24" />
+    <title>Lumibugs</title>
+    <!-- приложение с экрана «Домой»: полный экран, своя иконка и подпись (манифест подключает сборка для хостинга) -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Lumibugs" />
+    <link rel="apple-touch-icon" href="/lumibugsgame/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/lumibugsgame/icons/favicon-32.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+    <style>html,body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;background:#1d1036 linear-gradient(#120a24 50%,#1d1036 50%);height:100%;margin:0;overflow:hidden}#app{position:fixed;inset:0}#safe{left:0;right:0;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;position:fixed}canvas{display:block}</style>
+    <script>
+      // Файл игры не скачался — экран оставался тёмным навсегда (14.10: GitHub Pages в первые минуты после выкладки ответил
+      // 503 на один кусок кода). Один раз перезагружаемся сами; не помогло — просим нажать и попробовать ещё раз. main.ts
+      // пишет событие loadRetry. Текст здесь, а не в словарях: словари — в том самом коде, который не скачался.
+      (function () {
+        var KEY = 'glowjar.reload';
+        var failed = false;
+        function fail(what) {
+          if (failed) return;
+          failed = true;
+          var last = 0;
+          try {
+            last = Number(sessionStorage.getItem(KEY)) || 0;
+          } catch (e) {}
+          if (Date.now() - last > 30000) {
+            try {
+              sessionStorage.setItem(KEY, String(Date.now()));
+              sessionStorage.setItem(KEY + '.what', String(what).slice(-80));
+            } catch (e) {}
+            setTimeout(function () {
+              location.reload();
+            }, 1000);
+            return;
+          }
+          var lang = (navigator.language || 'en').slice(0, 2);
+          var text = {
+            ru: 'Игра не загрузилась. Проверь интернет и нажми, чтобы попробовать ещё раз',
+            es: 'El juego no se cargó. Revisa tu conexión y toca para intentarlo de nuevo',
+            pt: 'O jogo não carregou. Verifique sua conexão e toque para tentar de novo',
+            de: 'Das Spiel wurde nicht geladen. Prüfe deine Verbindung und tippe, um es noch einmal zu versuchen',
+          }[lang] || "The game didn't load. Check your connection and tap to try again";
+          var show = function () {
+            var d = document.createElement('div');
+            d.textContent = text;
+            d.style.cssText =
+              'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:32px;text-align:center;' +
+              'color:#ffe07a;font:700 20px/1.5 Nunito,system-ui,sans-serif;background:#1d1036;z-index:10';
+            d.onclick = function () {
+              location.reload();
+            };
+            document.body.appendChild(d);
+          };
+          if (document.body) show();
+          else addEventListener('DOMContentLoaded', show);
+        }
+        // код игры и его куски: ошибка загрузки <script type="module"> и <link rel="modulepreload">
+        addEventListener(
+          'error',
+          function (e) {
+            var el = e.target;
+            if (el && (el.tagName === 'SCRIPT' || (el.tagName === 'LINK' && el.rel === 'modulepreload'))) fail(el.src || el.href);
+          },
+          true,
+        );
+        // куски, которые грузятся позже (import() внутри Pixi)
+        addEventListener('vite:preloadError', function (e) {
+          e.preventDefault();
+          fail((e.payload && e.payload.message) || 'import');
+        });
+      })();
+    </script>
+    <script type="module" crossorigin src="/lumibugsgame/assets/index-Cz22oM57.js"></script>
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/CanvasPool-DecUtJxW.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/Filter-Cuc6AtmF.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/canvasUtils-CxYPZET9.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/Cache-DDo62lBW.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/GCManagedHash-DAuZ4Jch.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/RenderTargetSystem-DDNPaaQu.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/getTextureBatchBindGroup-DBCrgHVb.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/GraphicsContext-Buqq43v1.js">
+    <link rel="modulepreload" crossorigin href="/lumibugsgame/assets/BufferResource-Dkpy_QI2.js">
+  <link rel="manifest" href="/lumibugsgame/manifest.webmanifest"></head>
+  <body>
+    <div id="app"></div>
+    <div id="safe"></div>
+  </body>
+</html>
